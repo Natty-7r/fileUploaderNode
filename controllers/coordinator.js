@@ -2,7 +2,7 @@ const Drug = require("../models/drug");
 
 exports.getDrugs = async (req, res, next) => {
   try {
-    const drugs = await Drug.find();
+    const drugs = await Drug.find({ state: "store" });
     if (!drugs) {
       const error = new Error("unable to load drugs");
       error.statusCode = 500;

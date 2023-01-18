@@ -11,7 +11,7 @@ const addDrug = () => {
     amount: 25,
     price: 20,
     supplier: "dagi store",
-    expireDate: new Date("12/12/01"),
+    expireDate: new Date("12/12/41"),
     suppliedDate: new Date("12/12/12"),
     state: "stock",
   });
