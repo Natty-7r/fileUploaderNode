@@ -4,6 +4,7 @@ const Drug = require("./models/drug");
 const bodyParser = require("body-parser");
 
 const coordinatorRoutes = require("./routes/coordinator");
+const pharmacistRoutes = require("./routes/pharmacist");
 
 const addDrug = () => {
   const drug = new Drug({
@@ -11,15 +12,16 @@ const addDrug = () => {
     amount: 25,
     price: 20,
     supplier: "dagi store",
-    expireDate: new Date("12/12/41"),
+    expireDate: new Date("12/12/01"),
     suppliedDate: new Date("12/12/12"),
-    state: "stock",
+    state: "store",
   });
   drug.save();
 };
-// addDrug();
+addDrug();
 const app = express();
 app.use((req, res, next) => {
+  console.log(req.path);
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -28,7 +30,8 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.use(coordinatorRoutes);
+app.use("/coordinator", coordinatorRoutes);
+app.use("/pharmacist", pharmacistRoutes);
 
 mongoose
   .connect("mongodb://0.0.0.0:27017/drug-store")
