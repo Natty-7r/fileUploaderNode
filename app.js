@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Drug = require("./models/drug");
+const Drug = require("./models/store");
 const bodyParser = require("body-parser");
 
 const coordinatorRoutes = require("./routes/coordinator");
@@ -14,7 +14,7 @@ const addDrug = () => {
     supplier: "dagi store",
     expireDate: new Date("12/12/01"),
     suppliedDate: new Date("12/12/12"),
-    state: "store",
+    state: "stock",
   });
   drug.save();
 };

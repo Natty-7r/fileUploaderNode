@@ -3,7 +3,7 @@ const router = require("express").Router();
 
 router.get("/drugs", pharmacistContoller.getDrugs);
 
-router.patch("/drug", pharmacistContoller.updateDrug);
+router.patch("/drug", pharmacistContoller.sellDrug);
 
 router.delete("/drug/:drugId", pharmacistContoller.deleteDrug);
 

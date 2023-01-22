@@ -1,8 +1,9 @@
-const Drug = require("../models/drug");
+const Store = require("../models/store");
 
 exports.getDrugs = async (req, res, next) => {
   try {
-    const drugs = await Drug.find({ state: "store" });
+    console.log("dddddd");
+    const drugs = await Store.find({}).sort({ expireDate: -1 });
     if (!drugs) {
       const error = new Error("unable to load drugs");
       error.statusCode = 500;
@@ -15,7 +16,7 @@ exports.getDrugs = async (req, res, next) => {
 exports.updateDrug = async (req, res, next) => {
   const { drugId, newPrice, newAmount } = req.body;
   try {
-    const result = await Drug.updateOne(
+    const result = await Store.updateOne(
       { _id: drugId },
       { price: newPrice, amount: newAmount }
     );
@@ -31,7 +32,7 @@ exports.deleteDrug = async (req, res, next) => {
   const drugId = req.params.drugId;
 
   try {
-    const result = await Drug.deleteOne({ _id: drugId });
+    const result = await Store.deleteOne({ _id: drugId });
     if (!result.deletedCount == 0) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
@@ -48,7 +49,7 @@ exports.deleteDrugs = (req, res, next) => {
   console.log(drugIds);
 
   drugIds.forEach((drugId) => {
-    Drug.deleteOne({ _id: drugId })
+    Store.deleteOne({ _id: drugId })
       .then((result) => {
         if (!result.deletedCount == 0) {
           const error = new Error("deleting unsuccesfull");
