@@ -1,16 +1,30 @@
 const Store = require("../models/store");
+const StoreOrder = require("../models/toStore");
+const Requests = require("../models/request");
 
 exports.getDrugs = async (req, res, next) => {
   try {
-    console.log("dddddd");
     const drugs = await Store.find({}).sort({ expireDate: -1 });
+    // const expiredDrugs = await Store.find({}).sort({ expireDate: -1 });
+    const now = new Date();
+    const expiredDrugs = drugs.filter((drug) => {
+      return now > drug.expireDate;
+    });
+    const availbleDrugs = drugs.filter((drug) => {
+      return now < drug.expireDate;
+    });
+
+    const storeOrders = await StoreOrder.find({}).sort({ expireDate: -1 });
     if (!drugs) {
       const error = new Error("unable to load drugs");
       error.statusCode = 500;
       throw error;
     }
 
-    res.json({ status: "success", drugs });
+    res.json({
+      status: "success",
+      drugs: { availbleDrugs, expiredDrugs, storeOrders },
+    });
   } catch (error) {}
 };
 exports.updateDrug = async (req, res, next) => {
@@ -43,6 +57,7 @@ exports.deleteDrug = async (req, res, next) => {
 };
 
 exports.deleteDrugs = (req, res, next) => {
+  console.log(req.params);
   const drugId = req.params.drugIds;
   const drugIds = drugId.split(":");
   drugIds.shift();
@@ -59,4 +74,25 @@ exports.deleteDrugs = (req, res, next) => {
       })
       .catch((error) => {});
   });
+};
+exports.addRequest = (req, res, next) => {
+  const date = new Date();
+  let { requests } = req.body;
+  requests = requests.map((request) => {
+    request.date = date;
+    return request;
+  });
+  console.log(requests[0]);
+  Requests.insertMany(requests);
+};
+exports.registerDrugs = async (req, res, next) => {
+  try {
+    await Store.deleteMany({});
+    const newDrugs = req.body.newDrugs.map((drug) => {
+      delete drug._id;
+      return drug;
+    });
+    await Store.insertMany(newDrugs);
+    await StoreOrder.deleteMany({});
+  } catch (error) {}
 };
