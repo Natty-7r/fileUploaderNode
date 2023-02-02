@@ -1,6 +1,7 @@
+//  drug request from pharmacist to coordinator
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const forStoreSchema = new Schema({
+const stockRequestSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -22,7 +23,6 @@ const forStoreSchema = new Schema({
     required: true,
   },
   suppliedDate: { type: Date, required: true },
-  state: { type: String, required: true },
 });
 
-module.exports = mongoose.model("forStore", forStoreSchema);
+module.exports = mongoose.model("stockRequest", stockRequestSchema);

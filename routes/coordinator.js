@@ -9,7 +9,10 @@ router.delete("/drug/:drugId", coordinatorController.deleteDrug);
 
 router.delete("/drugs/:drugIds", coordinatorController.deleteDrugs);
 
-router.post("/request", coordinatorController.addRequest);
-router.post("/drugs/store", coordinatorController.registerDrugs);
+router.post("/drugs/request", coordinatorController.addRequest);
+
+router.post("/drugs/register", coordinatorController.registerDrugs);
+
+router.post("/drugs/order", coordinatorController.addToStock);
 
 module.exports = router;

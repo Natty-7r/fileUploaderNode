@@ -1,6 +1,8 @@
+// drugs in the stock
+
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const drugsSchema = new Schema(
+const stockSchema = new Schema(
   {
     name: {
       type: String,
@@ -23,27 +25,8 @@ const drugsSchema = new Schema(
       required: true,
     },
     suppliedDate: { type: Date, required: true },
-    state: { type: String, required: true },
   },
-  {
-    methods: {
-      printOwner() {
-        const id = this._id.toString();
-        mongoose
-          .model("Product")
-          .find({})
-          .then(([product]) => console.log(product.owner.name));
-      },
-    },
-    statics: {
-      printTitle(id) {
-        mongoose
-          .model("Product")
-          .find({ _id: id })
-          .then(([product]) => console.log(product.title));
-      },
-    },
-  }
+  {}
 );
 
-module.exports = mongoose.model("stock", drugsSchema);
+module.exports = mongoose.model("stock", stockSchema);

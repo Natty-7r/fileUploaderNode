@@ -1,7 +1,7 @@
-// drugs in the store
+//   drug order accepted from coordinator to pharamacist
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const storeSchema = new Schema({
+const stockOrderSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -25,4 +25,4 @@ const storeSchema = new Schema({
   suppliedDate: { type: Date, required: true },
 });
 
-module.exports = mongoose.model("store", storeSchema);
+module.exports = mongoose.model("stockeOrder", stockOrderSchema);
