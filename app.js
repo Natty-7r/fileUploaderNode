@@ -1,7 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 // const Drug = require("./models/toStore");
-const Drug = require("./models/store");
+// const Drug = require("./models/stock");
+const Drug = require("./models/stockOrder");
+// const Drug = require("./models/store");
 const bodyParser = require("body-parser");
 
 const coordinatorRoutes = require("./routes/coordinator");
