@@ -15,4 +15,6 @@ router.post("/drugs/register", coordinatorController.registerDrugs);
 
 router.post("/drugs/order", coordinatorController.addToStock);
 
+router.delete("/request", coordinatorController.clearStockRequest);
+
 module.exports = router;

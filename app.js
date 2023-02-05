@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
-// const Drug = require("./models/toStore");
 // const Drug = require("./models/stock");
-const Drug = require("./models/stockOrder");
+// const Drug = require("./models/stockOrder");
+const Drug = require("./models/storeOrder");
 // const Drug = require("./models/store");
 const bodyParser = require("body-parser");
 
@@ -11,11 +11,11 @@ const pharmacistRoutes = require("./routes/pharmacist");
 
 const addDrug = () => {
   const drug = new Drug({
-    name: "para",
+    name: "diclone",
     amount: 25,
     price: 20,
     supplier: "dagi store",
-    expireDate: new Date("12/12/25"),
+    expireDate: new Date("12/12/05"),
     suppliedDate: new Date("12/12/12"),
     state: "store",
   });

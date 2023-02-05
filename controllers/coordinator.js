@@ -11,6 +11,7 @@ exports.getDrugs = async (req, res, next) => {
   try {
     const storeDrugs = await Store.find({}).sort({ expireDate: -1 });
     const stockDrugs = await Stock.find({}).sort({ expireDate: -1 });
+    const stockRequests = await StockRequest.find({}).sort({ expireDate: -1 });
 
     const now = new Date();
     const expiredDrugs = storeDrugs.filter((drug) => {
@@ -38,6 +39,7 @@ exports.getDrugs = async (req, res, next) => {
         availbleStoreDrugs,
         expiredDrugs,
         storeOrders,
+        stockRequests,
       },
     });
   } catch (error) {}
@@ -136,5 +138,16 @@ exports.addToStock = async (req, res, next) => {
 
     await Store.insertMany(updatedAvailableDrugs);
     await StockOrder.insertMany(stockOrders);
+  } catch (error) {}
+};
+exports.clearStockRequest = async (req, res, next) => {
+  try {
+    const result = await StockRequest.deleteMany({});
+    if (!result.deletedCount == 0) {
+      const error = new Error("deleting unsuccesfull");
+      error.statusCode = 500;
+      throw error;
+    }
+    res.json({ status: "success" });
   } catch (error) {}
 };
