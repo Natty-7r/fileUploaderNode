@@ -1,4 +1,5 @@
 const Store = require("../models/store");
+const Drug = require("../models/stock");
 const Stock = require("../models/stock");
 
 const StockOrder = require("../models/stockOrder");
@@ -9,10 +10,10 @@ const StockRequest = require("../models/stockRequest");
 
 exports.getDrugs = async (req, res, next) => {
   try {
-    const storeDrugs = await Store.find({}).sort({ expireDate: -1 });
-    const stockDrugs = await Stock.find({}).sort({ expireDate: -1 });
-    const stockRequests = await StockRequest.find({}).sort({ expireDate: -1 });
-
+    const storeDrugs = await Store.findAll({});
+    const stockDrugs = await Stock.findAll({});
+    const stockRequests = await StockRequest.findAll({});
+    const storeOrders = await StoreOrder.findAll({});
     const now = new Date();
     const expiredDrugs = storeDrugs.filter((drug) => {
       return now > drug.expireDate;
@@ -25,7 +26,6 @@ exports.getDrugs = async (req, res, next) => {
       return now < drug.expireDate;
     });
 
-    const storeOrders = await StoreOrder.find({}).sort({ expireDate: -1 });
     if (!storeDrugs) {
       const error = new Error("unable to load drugs");
       error.statusCode = 500;
@@ -42,22 +42,35 @@ exports.getDrugs = async (req, res, next) => {
         stockRequests,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    res.json({
+      status: "fail",
+      message: "unable to fetch data",
+      drugs: {
+        availbleStockDrugs: [],
+        availbleStoreDrugs: [],
+        expiredDrugs: [],
+        storeOrders: [],
+        stockRequests: [],
+      },
+    });
+  }
 };
 exports.updateDrug = async (req, res, next) => {
-  const { drugId, newPrice, newAmount, currentSlide } = req.body;
+  const { drugCode, newPrice, newAmount, currentSlide } = req.body;
+  console.log(drugCode);
   let result;
   try {
     if (currentSlide == "availableStore")
-      result = await Store.updateOne(
-        { _id: drugId },
-        { price: newPrice, amount: newAmount }
+      result = await Store.update(
+        { price: newPrice, amount: newAmount },
+        { where: { drugCode: drugCode } }
       );
 
     if (currentSlide == "availableStock")
-      result = await Stock.updateOne(
-        { _id: drugId },
-        { price: newPrice, amount: newAmount }
+      result = await Stock.update(
+        { price: newPrice, amount: newAmount },
+        { where: { drugCode: drugCode } }
       );
 
     if (!result.acknowledged) {
@@ -66,40 +79,32 @@ exports.updateDrug = async (req, res, next) => {
       throw error;
     }
     res.json({ status: "success" });
-  } catch (error) {}
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };
 exports.deleteDrug = async (req, res, next) => {
-  const drugId = req.params.drugId;
-
+  const drugCode = req.params.drugCode;
   try {
-    const result = await Store.deleteOne({ _id: drugId });
-    if (!result.deletedCount == 0) {
+    const drugToDelete = await Store.findOne({ where: { drugCode: drugCode } });
+    const result = await drugToDelete.destroy();
+    if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
       throw error;
     }
     res.json({ status: "success" });
-  } catch (error) {}
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };
-
 exports.deleteDrugs = (req, res, next) => {
-  console.log(req.params);
-  const drugId = req.params.drugIds;
-  const drugIds = drugId.split(":");
-  drugIds.shift();
-  console.log(drugIds);
-
-  drugIds.forEach((drugId) => {
-    Store.deleteOne({ _id: drugId })
-      .then((result) => {
-        if (!result.deletedCount == 0) {
-          const error = new Error("deleting unsuccesfull");
-          error.statusCode = 500;
-          throw error;
-        }
-      })
-      .catch((error) => {});
-  });
+  const drugsCode = req.params.drugsCode;
+  const drugCodes = drugsCode.split(":");
+  drugCodes.shift();
+  try {
+    Store.destroy({ where: { drugCode: drugCodes } });
+  } catch (error) {}
 };
 exports.addRequest = (req, res, next) => {
   const date = new Date();
@@ -109,45 +114,55 @@ exports.addRequest = (req, res, next) => {
       request.requestDate = date;
       return request;
     });
-    StoreRequest.insertMany(storeRequest);
+    StoreRequest.bulkCreate(storeRequest, { validate: true });
+    res.json({ status: "success" });
   } catch (error) {
     console.log("error while sending requst to manager ");
+    res.json({ status: "fail" });
   }
 };
 exports.registerDrugs = async (req, res, next) => {
   try {
-    await Store.deleteMany({});
+    await Store.destroy({ truncate: true });
     const newDrugs = req.body.newDrugs.map((drug) => {
       delete drug._id;
       return drug;
     });
-    await Store.insertMany(newDrugs);
-    await StoreOrder.deleteMany({});
-  } catch (error) {}
+    await Store.bulkCreate(newDrugs, { validate: true });
+    await StoreOrder.destroy({ truncate: true });
+    res.json({ status: "success" });
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };
 exports.addToStock = async (req, res, next) => {
   const { stockOrders, availbleDrugs } = req.body;
 
   try {
-    await Store.deleteMany({});
+    await Store.destroy({ truncate: true });
 
     const updatedAvailableDrugs = availbleDrugs.map((drug) => {
       delete drug._id;
       return drug;
     });
 
-    await Store.insertMany(updatedAvailableDrugs);
-    await StockOrder.insertMany(stockOrders);
-  } catch (error) {}
+    await Store.bulkCreate(updatedAvailableDrugs, { validate: true });
+    await StockOrder.bulkCreate(stockOrders, { validate: true });
+    res.json({ status: "success" });
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };
 exports.clearStockRequest = async (req, res, next) => {
   try {
-    const result = await StockRequest.deleteMany({});
-    if (!result.deletedCount == 0) {
+    const result = await StockRequest.destroy({ truncate: true });
+    if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
       throw error;
     }
     res.json({ status: "success" });
-  } catch (error) {}
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };

@@ -1,18 +1,20 @@
 //  drug request from pharmacist to coordinator
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const stockRequestSchema = new Schema({
+
+const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require("../util/db");
+
+const StockOrder = sequelize.define("stockrequests", {
   name: {
-    type: String,
+    type: DataTypes.STRING,
     required: true,
   },
 
   amount: {
-    type: Number,
+    type: DataTypes.INTEGER,
     required: true,
   },
 
-  requestDate: { type: Date, required: true },
+  requestDate: { type: DataTypes.DATE, required: true },
 });
 
-module.exports = mongoose.model("stockRequest", stockRequestSchema);
+module.exports = StockOrder;

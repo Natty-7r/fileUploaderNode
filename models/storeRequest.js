@@ -1,18 +1,20 @@
 //  request from store coordinatore to manager
 
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const storeRequestSchema = new Schema({
+const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require("../util/db");
+
+const StoreRequest = sequelize.define("storerequests", {
   name: {
-    type: String,
+    type: DataTypes.STRING,
     required: true,
   },
 
   amount: {
-    type: Number,
+    type: DataTypes.INTEGER,
     required: true,
   },
-  requestDate: { type: Date, required: true },
+
+  requestDate: { type: DataTypes.DATE, required: true },
 });
 
-module.exports = mongoose.model("storeRequest", storeRequestSchema);
+module.exports = StoreRequest;

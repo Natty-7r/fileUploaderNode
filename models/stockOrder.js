@@ -1,28 +1,36 @@
 //   drug order accepted from coordinator to pharamacist
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const stockOrderSchema = new Schema({
+
+const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require("../util/db");
+
+const StockOrder = sequelize.define("stockorders", {
+  drugCode: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    primarykey: true,
+  },
   name: {
-    type: String,
+    type: DataTypes.STRING,
     required: true,
   },
   price: {
-    type: Number,
+    type: DataTypes.INTEGER,
     required: true,
   },
   amount: {
-    type: Number,
+    type: DataTypes.INTEGER,
     required: true,
   },
   expireDate: {
-    type: Date,
+    type: DataTypes.DATE,
     required: true,
   },
   supplier: {
-    type: String,
+    type: DataTypes.STRING,
+
     required: true,
   },
-  suppliedDate: { type: Date, required: true },
+  suppliedDate: { type: DataTypes.DATE, required: true },
 });
 
-module.exports = mongoose.model("stockeOrder", stockOrderSchema);
+module.exports = StockOrder;

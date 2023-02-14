@@ -1,10 +1,10 @@
 const Sequelize = require("sequelize");
-// require("dotenv").config();
+require("dotenv").config();
 
 const sequelize = new Sequelize(
-  "sewidrugstore",
-  "root",
-  "next@7",
+  process.env.DB,
+  process.env.DBUSER,
+  process.env.DBPASSWORD,
 
   {
     host: "localhost",

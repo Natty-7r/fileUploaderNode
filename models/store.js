@@ -1,28 +1,41 @@
 // drugs in the store
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const storeSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  expireDate: {
-    type: Date,
-    required: true,
-  },
-  supplier: {
-    type: String,
-    required: true,
-  },
-  suppliedDate: { type: Date, required: true },
-});
 
-module.exports = mongoose.model("store", storeSchema);
+const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require("../util/db");
+
+const Store = sequelize.define(
+  "storedrugs",
+  {
+    drugCode: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primarykey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      required: true,
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      required: true,
+    },
+    amount: {
+      type: DataTypes.INTEGER,
+      required: true,
+    },
+    expireDate: {
+      type: DataTypes.DATE,
+      required: true,
+    },
+    supplier: {
+      type: DataTypes.STRING,
+      required: true,
+    },
+    suppliedDate: { type: DataTypes.DATE, required: true },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = Store;
