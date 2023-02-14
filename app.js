@@ -12,6 +12,7 @@ const sequelize = require("./util/db");
 
 const coordinatorRoutes = require("./routes/coordinator");
 const pharmacistRoutes = require("./routes/pharmacist");
+const managerRoutes = require("./routes/manager");
 
 const addDrug = () => {
   const drug = new Drug({
@@ -40,6 +41,7 @@ app.use(bodyParser.json());
 
 app.use("/coordinator", coordinatorRoutes);
 app.use("/pharmacist", pharmacistRoutes);
+app.use("/manager", managerRoutes);
 
 const PORT = 8081;
 sequelize
