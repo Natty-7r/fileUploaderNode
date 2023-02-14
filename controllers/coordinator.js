@@ -99,7 +99,9 @@ exports.deleteDrug = async (req, res, next) => {
   }
 };
 exports.deleteDrugs = (req, res, next) => {
-  const drugsCode = req.params.drugsCode;
+  console.log(req.params);
+  const drugsCode = req.params.drugCodes;
+
   const drugCodes = drugsCode.split(":");
   drugCodes.shift();
   try {
@@ -137,17 +139,22 @@ exports.registerDrugs = async (req, res, next) => {
 };
 exports.addToStock = async (req, res, next) => {
   const { stockOrders, availbleDrugs } = req.body;
-
+  console.log(stockOrders);
   try {
-    await Store.destroy({ truncate: true });
-
+    Store.destroy({
+      where: {},
+      truncate: true,
+    });
     const updatedAvailableDrugs = availbleDrugs.map((drug) => {
-      delete drug._id;
+      delete drug.id;
       return drug;
     });
-
+    const updatedStockOrders = stockOrders.map((drug) => {
+      delete drug.id;
+      return drug;
+    });
     await Store.bulkCreate(updatedAvailableDrugs, { validate: true });
-    await StockOrder.bulkCreate(stockOrders, { validate: true });
+    await StockOrder.bulkCreate(updatedStockOrders, { validate: true });
     res.json({ status: "success" });
   } catch (error) {
     res.json({ status: "fail" });
