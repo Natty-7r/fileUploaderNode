@@ -3,7 +3,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../util/db");
 
-const Stock = sequelize.define("stockdrugs", {
+const Stock = sequelize.define("soldrugs", {
   drugCode: {
     type: DataTypes.INTEGER,
     allowNull: false,

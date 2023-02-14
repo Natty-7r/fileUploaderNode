@@ -7,6 +7,7 @@ const StoreOrder = require("../models/storeOrder");
 
 const StoreRequest = require("../models/storeRequest");
 const StockRequest = require("../models/stockRequest");
+const { Socket } = require("socket.io");
 
 exports.getDrugs = async (req, res, next) => {
   try {
@@ -72,11 +73,21 @@ exports.acceptOrders = async (req, res, next) => {
 
 exports.sellDrug = async (req, res, next) => {
   const { drugCode, newAmount } = req.body;
+  const today = new Date();
   try {
+    let drugSold = await Stock.findOne({ where: { drugCode: drugCode } });
+    drugSold = drugSold.dataValues;
+    drugSold.soldDate = today;
+    drugSold.amount -= newAmount;
+    delete drugSold.id;
+
     result = await Stock.update(
       { amount: newAmount },
       { where: { drugCode: drugCode } }
     );
+    console.log(drugSold);
+    drugSold = new SoldDrugs(drugSold);
+    await drugSold.save();
     if (!result.acknowledged) {
       const error = new Error("updating unsuccesfull");
       error.statusCode = 500;
