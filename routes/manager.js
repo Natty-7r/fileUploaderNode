@@ -11,8 +11,6 @@ router.delete("/drugs/:drugCodes", managerController.clearAllSoldDrugs);
 
 router.post("/drugs/request", managerController.sendOrder);
 
-router.post("/drugs/register", managerController.registerDrugs);
-
 router.post("/drugs/order", managerController.orderDrugs);
 
 router.delete("/request", managerController.clearStoreRequest);

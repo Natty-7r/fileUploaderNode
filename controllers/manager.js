@@ -118,20 +118,7 @@ exports.sendOrder = (req, res, next) => {
     res.json({ status: "fail" });
   }
 };
-exports.registerDrugs = async (req, res, next) => {
-  try {
-    await Store.destroy({ truncate: true });
-    const newDrugs = req.body.newDrugs.map((drug) => {
-      delete drug._id;
-      return drug;
-    });
-    await Store.bulkCreate(newDrugs, { validate: true });
-    await StoreOrder.destroy({ truncate: true });
-    res.json({ status: "success" });
-  } catch (error) {
-    res.json({ status: "fail" });
-  }
-};
+
 exports.orderDrugs = async (req, res, next) => {
   const { storeOrders } = req.body;
   try {
