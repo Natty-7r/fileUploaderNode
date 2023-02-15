@@ -5,9 +5,9 @@ router.get("/drugs", managerController.getDrugs);
 
 router.patch("/drug", managerController.updateDrug);
 
-router.delete("/drug/:drugCode", managerController.deleteDrug);
+router.delete("/drug/:drugCode", managerController.clearSoldDrug);
 
-router.delete("/drugs/:drugCodes", managerController.deleteDrugs);
+router.delete("/drugs/:drugCodes", managerController.clearAllSoldDrugs);
 
 router.post("/drugs/request", managerController.addRequest);
 

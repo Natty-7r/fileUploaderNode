@@ -74,10 +74,12 @@ exports.updateDrug = async (req, res, next) => {
     res.json({ status: "fail" });
   }
 };
-exports.deleteDrug = async (req, res, next) => {
+exports.clearSoldDrug = async (req, res, next) => {
   const drugCode = req.params.drugCode;
   try {
-    const drugToDelete = await Store.findOne({ where: { drugCode: drugCode } });
+    const drugToDelete = await SoldDrug.findOne({
+      where: { drugCode: drugCode },
+    });
     const result = await drugToDelete.destroy();
     if (!result) {
       const error = new Error("deleting unsuccesfull");
@@ -89,14 +91,14 @@ exports.deleteDrug = async (req, res, next) => {
     res.json({ status: "fail" });
   }
 };
-exports.deleteDrugs = (req, res, next) => {
+exports.clearAllSoldDrugs = (req, res, next) => {
   console.log(req.params);
   const drugsCode = req.params.drugCodes;
 
   const drugCodes = drugsCode.split(":");
   drugCodes.shift();
   try {
-    Store.destroy({ where: { drugCode: drugCodes } });
+    SoldDrug.destroy({ where: { drugCode: drugCodes } });
   } catch (error) {}
 };
 exports.addRequest = (req, res, next) => {
