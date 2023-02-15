@@ -34,11 +34,12 @@ const addComment = () => {
     sender: "supplier",
     message: "the first comment ",
     commentDate: new Date("12/12/05"),
+    status: "unread",
   });
   comment.save();
 };
 
-addComment();
+// addComment();
 
 const app = express();
 app.use((req, res, next) => {

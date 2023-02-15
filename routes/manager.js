@@ -3,18 +3,18 @@ const router = require("express").Router();
 
 router.get("/drugs", managerController.getDrugs);
 
-router.patch("/drug", managerController.updateDrug);
+router.patch("/comment", managerController.updateCommentStatus);
 
-router.delete("/drug/:drugCode", managerController.clearSoldDrug);
+router.delete("/comment/:commentId", managerController.clearComment);
 
 router.delete("/drugs/:drugCodes", managerController.clearAllSoldDrugs);
 
-router.post("/drugs/request", managerController.addRequest);
+router.post("/drugs/request", managerController.sendOrder);
 
 router.post("/drugs/register", managerController.registerDrugs);
 
-router.post("/drugs/order", managerController.addToStock);
+router.post("/drugs/order", managerController.orderDrugs);
 
-router.delete("/request", managerController.clearStockRequest);
+router.delete("/request", managerController.clearStoreRequest);
 
 module.exports = router;

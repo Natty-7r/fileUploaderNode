@@ -2,6 +2,7 @@ const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
 const Comment = require("../models/comments");
+const ManagerOrder = require("../models/managerOrder");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
@@ -15,6 +16,7 @@ exports.getDrugs = async (req, res, next) => {
     const stockDrugs = await Stock.findAll({});
 
     const soldDrugs = await SoldDrug.findAll({});
+    const storeRequests = await StoreRequest.findAll({});
     const comments = await Comment.findAll({});
 
     if (!storeDrugs) {
@@ -32,6 +34,7 @@ exports.getDrugs = async (req, res, next) => {
         storeOrders: [],
         stockRequests: [],
         comments,
+        storeRequests,
       },
     });
   } catch (error) {
@@ -49,23 +52,20 @@ exports.getDrugs = async (req, res, next) => {
     });
   }
 };
-exports.updateDrug = async (req, res, next) => {
-  const { drugCode, newPrice, newAmount, currentSlide } = req.body;
-  console.log(drugCode);
+exports.updateCommentStatus = async (req, res, next) => {
+  const { commentId, newStatus } = req.body;
   let result;
   try {
-    if (currentSlide == "availableStore")
-      result = await Store.update(
-        { price: newPrice, amount: newAmount },
-        { where: { drugCode: drugCode } }
-      );
+    result = await Comment.update(
+      { status: newStatus },
+      { where: { id: commentId } }
+    );
 
-    if (currentSlide == "availableStock")
-      result = await Stock.update(
-        { price: newPrice, amount: newAmount },
-        { where: { drugCode: drugCode } }
-      );
-
+    if (!result) {
+      const error = new Error("updating unsuccesfull");
+      error.statusCode = 500;
+      throw error;
+    }
     if (!result.acknowledged) {
       const error = new Error("updating unsuccesfull");
       error.statusCode = 500;
@@ -76,13 +76,13 @@ exports.updateDrug = async (req, res, next) => {
     res.json({ status: "fail" });
   }
 };
-exports.clearSoldDrug = async (req, res, next) => {
-  const drugCode = req.params.drugCode;
+exports.clearComment = async (req, res, next) => {
+  const commentId = req.params.commentId;
   try {
-    const drugToDelete = await SoldDrug.findOne({
-      where: { drugCode: drugCode },
+    const commentToDelete = await Comment.findOne({
+      where: { id: commentId },
     });
-    const result = await drugToDelete.destroy();
+    const result = await commentToDelete.destroy();
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
@@ -103,7 +103,7 @@ exports.clearAllSoldDrugs = (req, res, next) => {
     SoldDrug.destroy({ where: { drugCode: drugCodes } });
   } catch (error) {}
 };
-exports.addRequest = (req, res, next) => {
+exports.sendOrder = (req, res, next) => {
   const date = new Date();
   let { storeRequest } = req.body;
   try {
@@ -111,7 +111,7 @@ exports.addRequest = (req, res, next) => {
       request.requestDate = date;
       return request;
     });
-    StoreRequest.bulkCreate(storeRequest, { validate: true });
+    StoreOrder.bulkCreate(storeRequest, { validate: true });
     res.json({ status: "success" });
   } catch (error) {
     console.log("error while sending requst to manager ");
@@ -132,32 +132,18 @@ exports.registerDrugs = async (req, res, next) => {
     res.json({ status: "fail" });
   }
 };
-exports.addToStock = async (req, res, next) => {
-  const { stockOrders, availbleDrugs } = req.body;
-  console.log(stockOrders);
+exports.orderDrugs = async (req, res, next) => {
+  const { storeOrders } = req.body;
   try {
-    Store.destroy({
-      where: {},
-      truncate: true,
-    });
-    const updatedAvailableDrugs = availbleDrugs.map((drug) => {
-      delete drug.id;
-      return drug;
-    });
-    const updatedStockOrders = stockOrders.map((drug) => {
-      delete drug.id;
-      return drug;
-    });
-    await Store.bulkCreate(updatedAvailableDrugs, { validate: true });
-    await StockOrder.bulkCreate(updatedStockOrders, { validate: true });
+    await ManagerOrder.bulkCreate(storeOrders, { validate: true });
     res.json({ status: "success" });
   } catch (error) {
     res.json({ status: "fail" });
   }
 };
-exports.clearStockRequest = async (req, res, next) => {
+exports.clearStoreRequest = async (req, res, next) => {
   try {
-    const result = await StockRequest.destroy({ truncate: true });
+    const result = await StoreRequest.destroy({ truncate: true });
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;

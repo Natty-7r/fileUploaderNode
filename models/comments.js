@@ -22,6 +22,11 @@ const Stock = sequelize.define(
       type: DataTypes.STRING,
       required: true,
     },
+    status: {
+      default: "unread",
+      type: DataTypes.STRING,
+      required: true,
+    },
 
     commentDate: { type: DataTypes.DATE, required: true },
   },
