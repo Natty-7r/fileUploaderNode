@@ -1,6 +1,7 @@
 const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
+const Comment = require("../models/comments");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
@@ -14,8 +15,7 @@ exports.getDrugs = async (req, res, next) => {
     const stockDrugs = await Stock.findAll({});
 
     const soldDrugs = await SoldDrug.findAll({});
-    const stockRequests = await StockRequest.findAll({});
-    const storeOrders = await StoreOrder.findAll({});
+    const comments = await Comment.findAll({});
 
     if (!storeDrugs) {
       const error = new Error("unable to load drugs");
@@ -29,11 +29,13 @@ exports.getDrugs = async (req, res, next) => {
         availbleStockDrugs: stockDrugs,
         availbleStoreDrugs: storeDrugs,
         expiredDrugs: soldDrugs,
-        storeOrders,
-        stockRequests,
+        storeOrders: [],
+        stockRequests: [],
+        comments,
       },
     });
   } catch (error) {
+    console.log(error);
     res.json({
       status: "fail",
       message: "unable to fetch data",

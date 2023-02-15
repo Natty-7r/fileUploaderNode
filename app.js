@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 // const Drug = require("./models/storeOrder");
 // const Drug = require("./models/store");
 const Drug = require("./models/stock");
+const Comment = require("./models/comments");
 const bodyParser = require("body-parser");
 
 // my
@@ -27,6 +28,17 @@ const addDrug = () => {
   drug.save();
 };
 // addDrug();
+const addComment = () => {
+  const comment = new Comment({
+    name: "natty",
+    sender: "supplier",
+    message: "the first comment ",
+    commentDate: new Date("12/12/05"),
+  });
+  comment.save();
+};
+
+addComment();
 
 const app = express();
 app.use((req, res, next) => {
