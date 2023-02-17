@@ -8,6 +8,11 @@ const StoreRequest = sequelize.define("managerOrder", {
     type: DataTypes.STRING,
     required: true,
   },
+  status: {
+    type: DataTypes.STRING,
+    required: true,
+    default: "pending",
+  },
 
   amount: {
     type: DataTypes.INTEGER,
