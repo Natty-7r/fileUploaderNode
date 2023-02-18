@@ -1,13 +1,13 @@
 const Store = require("../models/store");
 const Stock = require("../models/stock");
-const ManagerOrder = require("../models/managerOrder");
+const ManagerOrder = require("../models/managerRequest");
+const Comment = require("../models/comments");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
 
 const StoreRequest = require("../models/storeRequest");
 const StockRequest = require("../models/stockRequest");
-const { Socket } = require("socket.io");
 
 exports.getIndex = async (req, res, next) => {
   try {
@@ -19,6 +19,9 @@ exports.getIndex = async (req, res, next) => {
     });
     const rejectedOrders = await ManagerOrder.findAll({
       where: { status: "rejected" },
+    });
+    const comments = await Comment.findAll({
+      where: { sender: "supplier" },
     });
 
     if (!pendingOrders || !rejectedOrders || !acceptedOrders) {
@@ -33,6 +36,7 @@ exports.getIndex = async (req, res, next) => {
         pendingOrders,
         acceptedOrders,
         rejectedOrders,
+        comments,
       },
     });
   } catch (error) {
@@ -43,6 +47,7 @@ exports.getIndex = async (req, res, next) => {
         pendingOrders: [],
         acceptedOrders: [],
         rejectedOrders: [],
+        comments: [],
       },
     });
   }

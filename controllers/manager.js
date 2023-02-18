@@ -2,7 +2,7 @@ const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
 const Comment = require("../models/comments");
-const ManagerOrder = require("../models/managerOrder");
+const ManagerOrder = require("../models/managerRequest");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");

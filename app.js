@@ -5,7 +5,9 @@ const mongoose = require("mongoose");
 // const Drug = require("./models/store");
 const Drug = require("./models/stock");
 const Comment = require("./models/comments");
-const MOrder = require("./models/managerOrder");
+const MOrder = require("./models/managerRequest");
+const RequestDrug = require("./models/requestedDrugs");
+const Request = require("./models/request");
 const bodyParser = require("body-parser");
 
 // my
@@ -70,6 +72,9 @@ app.use("/manager", managerRoutes);
 app.use("/supplier", supplierRoutes);
 
 const PORT = 8081;
+
+Request.hasMany(RequestDrug);
+RequestDrug.belongsTo(Request);
 sequelize
   .sync()
   // .sync({ update: true })
