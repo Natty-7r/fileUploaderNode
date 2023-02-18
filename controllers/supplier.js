@@ -1,28 +1,32 @@
-const Store = require("../models/store");
-const Stock = require("../models/stock");
+const { Op, where } = require("sequelize");
+
 const Comment = require("../models/comments");
 
-const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
 
 const Request = require("../models/request");
 
+const RequestDrug = require("../models/requestedDrugs");
+
 exports.getIndex = async (req, res, next) => {
   try {
-    const pendingOrders = await ManagerOrder.findAll({
+    const pendingOrders = await Request.findAll({
       where: {
         [Op.and]: [{ status: "pending" }, { sender: "manager" }],
       },
+      include: RequestDrug,
     });
-    const acceptedOrders = await ManagerOrder.findAll({
+    const acceptedOrders = await Request.findAll({
       where: {
         [Op.and]: [{ status: "accepted" }, { sender: "manager" }],
       },
+      include: RequestDrug,
     });
-    const rejectedOrders = await ManagerOrder.findAll({
+    const rejectedOrders = await Request.findAll({
       where: {
         [Op.and]: [{ status: "rejected" }, { sender: "manager" }],
       },
+      include: RequestDrug,
     });
     const comments = await Comment.findAll({
       where: { sender: "supplier" },
@@ -57,16 +61,22 @@ exports.getIndex = async (req, res, next) => {
   }
 };
 
-exports.requestDrug = async (req, res, next) => {
-  const date = new Date();
-  let { stockRequest: stockRequests } = req.body;
+exports.addComment = async (req, res, next) => {
+  let { message } = req.body;
   try {
-    stockRequests = stockRequests.map((request) => {
-      request.requestDate = date;
-      return request;
+    const comment = new Comment({
+      name: "natty",
+      sender: "supplier",
+      message,
+      commentDate: new Date(),
+      status: "unread",
     });
+    const commentSaved = await comment.save();
 
-    await StockRequest.bulkCreate(stockRequests, { validate: true });
+    if (!commentSaved) {
+      const error = new Error("ddd");
+      throw error;
+    }
     res.json({ status: "success" });
   } catch (error) {
     res.json({
@@ -75,50 +85,39 @@ exports.requestDrug = async (req, res, next) => {
     });
   }
 };
-exports.acceptOrders = async (req, res, next) => {
+
+exports.chageOrderStatus = async (req, res, next) => {
+  const { requestId, status } = req.body;
+
   try {
-    await Stock.destroy({ truncate: true });
-    const newDrugs = req.body.newDrugs.map((drug) => {
-      delete drug._id;
-      return drug;
-    });
-    await Stock.bulkCreate(newDrugs, { validate: true });
-    await StockOrder.destroy({ truncate: true });
-  } catch (error) {}
+    await Request.update({ status: status }, { where: { id: requestId } });
+    res.json({ status: "success" });
+  } catch (error) {
+    res.json({ status: "fail" });
+  }
 };
 
-exports.sellDrug = async (req, res, next) => {
-  const { drugCode, newAmount } = req.body;
-  const today = new Date();
+exports.sendOrder = async (req, res, next) => {
+  const { orders } = req.body;
   try {
-    let drugSold = await Stock.findOne({ where: { drugCode: drugCode } });
-    drugSold = drugSold.dataValues;
-    drugSold.soldDate = today;
-    drugSold.amount -= newAmount;
-    delete drugSold.id;
-
-    result = await Stock.update(
-      { amount: newAmount },
-      { where: { drugCode: drugCode } }
-    );
-    console.log(drugSold);
-    drugSold = new SoldDrugs(drugSold);
-    await drugSold.save();
-    if (!result.acknowledged) {
+    const savedDrug = await StoreOrder.bulkCreate(orders, { validate: true });
+    if (!savedDrug) {
       const error = new Error("updating unsuccesfull");
       error.statusCode = 500;
       throw error;
     }
     res.json({ status: "success" });
   } catch (error) {
+    console.log(error);
     res.json({ status: "fail" });
   }
 };
-exports.deleteDrug = async (req, res, next) => {
-  const drugCode = req.params.drugCode;
+
+exports.clearOrder = async (req, res, next) => {
+  const requestId = req.params.requestId;
   try {
-    const drugToDelete = await Stock.findOne({ where: { drugCode: drugCode } });
-    const result = await drugToDelete.destroy();
+    const result = await Request.destroy({ where: { id: requestId } });
+
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
@@ -128,13 +127,4 @@ exports.deleteDrug = async (req, res, next) => {
   } catch (error) {
     res.json({ status: "fail" });
   }
-};
-
-exports.deleteDrugs = (req, res, next) => {
-  const drugsCode = req.params.drugsCode;
-  const drugCodes = drugsCode.split(":");
-  drugCodes.shift();
-  try {
-    Stock.destroy({ where: { drugCode: drugCodes } });
-  } catch (error) {}
 };

@@ -4,17 +4,13 @@ const router = require("express").Router();
 
 router.get("/index", supplierContoller.getIndex);
 
-router.patch("/drug", supplierContoller.sellDrug);
+router.post("/comment", supplierContoller.addComment);
 
-router.delete("/drug/:drugCode", supplierContoller.deleteDrug);
+router.post("/register", supplierContoller.sendOrder);
 
-router.delete("/drugs/:drugsCode", supplierContoller.deleteDrugs);
+router.patch("/order", supplierContoller.chageOrderStatus);
 
-router.post("/drugs/request", supplierContoller.requestDrug);
-
-router.post("/drugs/register", supplierContoller.acceptOrders);
-
-// router.post("/drugs/order", supplierContoller.addToStock);
+router.delete("/order/:requestId", supplierContoller.clearOrder);
 
 module.exports = router;
 

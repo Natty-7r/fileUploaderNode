@@ -3,7 +3,6 @@ const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
 const Comment = require("../models/comments");
 
-const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
 const Request = require("../models/request");
 const RequestDrug = require("../models/requestedDrugs");
@@ -91,33 +90,6 @@ exports.clearComment = async (req, res, next) => {
     }
     res.json({ status: "success" });
   } catch (error) {
-    res.json({ status: "fail" });
-  }
-};
-exports.clearAllSoldDrugs = (req, res, next) => {
-  console.log(req.params);
-  const drugsCode = req.params.drugCodes;
-
-  const drugCodes = drugsCode.split(":");
-  drugCodes.shift();
-  try {
-    SoldDrug.destroy({ where: { drugCode: drugCodes } });
-  } catch (error) {}
-};
-exports.sendOrder = (req, res, next) => {
-  const date = new Date();
-  let { storeRequest } = req.body;
-
-  try {
-    storeRequest = storeRequest.map((request) => {
-      request.requestDate = date;
-      return request;
-    });
-
-    StoreOrder.bulkCreate(storeRequest, { validate: true });
-    res.json({ status: "success" });
-  } catch (error) {
-    console.log("error while sending requst to manager ");
     res.json({ status: "fail" });
   }
 };
