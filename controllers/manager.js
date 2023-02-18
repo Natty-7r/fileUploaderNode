@@ -5,6 +5,8 @@ const Comment = require("../models/comments");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
+const Request = require("../models/request");
+const RequestDrug = require("../models/requestedDrugs");
 
 exports.getDrugs = async (req, res, next) => {
   try {
@@ -14,6 +16,7 @@ exports.getDrugs = async (req, res, next) => {
     const soldDrugs = await SoldDrug.findAll({});
     const storeRequests = await Request.findAll({
       where: { sender: "coordinator" },
+      include: RequestDrug,
     });
     const comments = await Comment.findAll({});
 
