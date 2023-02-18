@@ -2,13 +2,9 @@ const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
 const Comment = require("../models/comments");
-const ManagerOrder = require("../models/managerRequest");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
-
-const StoreRequest = require("../models/storeRequest");
-const StockRequest = require("../models/stockRequest");
 
 exports.getDrugs = async (req, res, next) => {
   try {
@@ -16,7 +12,9 @@ exports.getDrugs = async (req, res, next) => {
     const stockDrugs = await Stock.findAll({});
 
     const soldDrugs = await SoldDrug.findAll({});
-    const storeRequests = await StoreRequest.findAll({});
+    const storeRequests = await Request.findAll({
+      where: { sender: "coordinator" },
+    });
     const comments = await Comment.findAll({});
 
     if (!storeDrugs) {
@@ -106,11 +104,13 @@ exports.clearAllSoldDrugs = (req, res, next) => {
 exports.sendOrder = (req, res, next) => {
   const date = new Date();
   let { storeRequest } = req.body;
+
   try {
     storeRequest = storeRequest.map((request) => {
       request.requestDate = date;
       return request;
     });
+
     StoreOrder.bulkCreate(storeRequest, { validate: true });
     res.json({ status: "success" });
   } catch (error) {
@@ -121,8 +121,19 @@ exports.sendOrder = (req, res, next) => {
 
 exports.orderDrugs = async (req, res, next) => {
   const { storeOrders } = req.body;
+
   try {
-    await ManagerOrder.bulkCreate(storeOrders, { validate: true });
+    await Request.create(
+      {
+        sender: "manager",
+        status: "pending",
+        requestDate: new Date(),
+        requestedDrugs: storeOrders,
+      },
+      {
+        include: [RequestDrug],
+      }
+    );
     res.json({ status: "success" });
   } catch (error) {
     res.json({ status: "fail" });
@@ -130,7 +141,11 @@ exports.orderDrugs = async (req, res, next) => {
 };
 exports.clearStoreRequest = async (req, res, next) => {
   try {
-    const result = await StoreRequest.destroy({ truncate: true });
+    const result = await Request.destroy({
+      where: {
+        sender: "coordinator",
+      },
+    });
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;

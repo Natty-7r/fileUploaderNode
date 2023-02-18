@@ -1,13 +1,11 @@
 const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrugs = require("../models/soldDrugs");
+const Request = require("../models/request");
+const RequestDrug = require("../models/requestedDrugs");
 
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
-
-const StoreRequest = require("../models/storeRequest");
-const StockRequest = require("../models/stockRequest");
-const { Socket } = require("socket.io");
 
 exports.getDrugs = async (req, res, next) => {
   try {
@@ -42,15 +40,20 @@ exports.getDrugs = async (req, res, next) => {
 };
 
 exports.requestDrug = async (req, res, next) => {
-  const date = new Date();
   let { stockRequest: stockRequests } = req.body;
-  try {
-    stockRequests = stockRequests.map((request) => {
-      request.requestDate = date;
-      return request;
-    });
 
-    await StockRequest.bulkCreate(stockRequests, { validate: true });
+  try {
+    await Request.create(
+      {
+        sender: "pharmacist",
+        status: "pending",
+        requestDate: new Date(),
+        requestedDrugs: stockRequests,
+      },
+      {
+        include: [RequestDrug],
+      }
+    );
     res.json({ status: "success" });
   } catch (error) {
     res.json({

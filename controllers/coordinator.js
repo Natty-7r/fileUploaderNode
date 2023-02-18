@@ -5,14 +5,18 @@ const Stock = require("../models/stock");
 const StockOrder = require("../models/stockOrder");
 const StoreOrder = require("../models/storeOrder");
 
-const StoreRequest = require("../models/storeRequest");
-const StockRequest = require("../models/stockRequest");
+const Request = require("../models/request");
+const RequestDrug = require("../models/requestedDrugs");
 
 exports.getDrugs = async (req, res, next) => {
   try {
     const storeDrugs = await Store.findAll({});
     const stockDrugs = await Stock.findAll({});
-    const stockRequests = await StockRequest.findAll({});
+    let stockRequests = await Request.findAll({
+      where: { sender: "pharmacist" },
+      include: RequestDrug,
+    });
+
     const storeOrders = await StoreOrder.findAll({});
     const now = new Date();
     const expiredDrugs = storeDrugs.filter((drug) => {
@@ -43,6 +47,7 @@ exports.getDrugs = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.log(error);
     res.json({
       status: "fail",
       message: "unable to fetch data",
@@ -108,15 +113,21 @@ exports.deleteDrugs = (req, res, next) => {
     Store.destroy({ where: { drugCode: drugCodes } });
   } catch (error) {}
 };
-exports.addRequest = (req, res, next) => {
+exports.addRequest = async (req, res, next) => {
   const date = new Date();
   let { storeRequest } = req.body;
   try {
-    storeRequest = storeRequest.map((request) => {
-      request.requestDate = date;
-      return request;
-    });
-    StoreRequest.bulkCreate(storeRequest, { validate: true });
+    await Request.create(
+      {
+        sender: "coordinator",
+        status: "pending",
+        requestDate: new Date(),
+        requestedDrugs: storeRequest,
+      },
+      {
+        include: [RequestDrug],
+      }
+    );
     res.json({ status: "success" });
   } catch (error) {
     console.log("error while sending requst to manager ");
@@ -162,7 +173,11 @@ exports.addToStock = async (req, res, next) => {
 };
 exports.clearStockRequest = async (req, res, next) => {
   try {
-    const result = await StockRequest.destroy({ truncate: true });
+    const result = await Request.destroy({
+      where: {
+        sender: "pharmacist",
+      },
+    });
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;

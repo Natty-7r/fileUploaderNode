@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 // const Drug = require("./models/store");
 const Drug = require("./models/stock");
 const Comment = require("./models/comments");
-const MOrder = require("./models/managerRequest");
 const RequestDrug = require("./models/requestedDrugs");
 const Request = require("./models/request");
 const bodyParser = require("body-parser");
@@ -43,17 +42,6 @@ const addComment = () => {
   });
   comment.save();
 };
-const addmorder = () => {
-  const m = new MOrder({
-    name: "natty",
-    amount: 12,
-    status: "rejected",
-    requestDate: new Date("2/16/2023"),
-  });
-  m.save();
-};
-
-// addmorder();
 
 const app = express();
 app.use((req, res, next) => {
@@ -73,7 +61,7 @@ app.use("/supplier", supplierRoutes);
 
 const PORT = 8081;
 
-Request.hasMany(RequestDrug);
+Request.RequestDrugs = Request.hasMany(RequestDrug, { onDelete: "CASCADE" });
 RequestDrug.belongsTo(Request);
 sequelize
   .sync()
@@ -83,6 +71,6 @@ sequelize
       console.log(`server running at port ${PORT} `);
     });
   })
-  .catch((err) => console.log(err, "jjjjjjjjjjjjjjj"));
+  .catch((err) => console.log(err));
 
 app.listen(8080);
