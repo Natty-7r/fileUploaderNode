@@ -138,7 +138,7 @@ exports.registerDrugs = async (req, res, next) => {
   try {
     await Store.destroy({ truncate: true });
     const newDrugs = req.body.newDrugs.map((drug) => {
-      delete drug._id;
+      delete drug.id;
       return drug;
     });
     await Store.bulkCreate(newDrugs, { validate: true });
@@ -150,10 +150,8 @@ exports.registerDrugs = async (req, res, next) => {
 };
 exports.addToStock = async (req, res, next) => {
   const { stockOrders, availbleDrugs } = req.body;
-  console.log(stockOrders);
   try {
     Store.destroy({
-      where: {},
       truncate: true,
     });
     const updatedAvailableDrugs = availbleDrugs.map((drug) => {

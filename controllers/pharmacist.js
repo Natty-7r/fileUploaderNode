@@ -66,7 +66,7 @@ exports.acceptOrders = async (req, res, next) => {
   try {
     await Stock.destroy({ truncate: true });
     const newDrugs = req.body.newDrugs.map((drug) => {
-      delete drug._id;
+      delete drug.id;
       return drug;
     });
     await Stock.bulkCreate(newDrugs, { validate: true });
