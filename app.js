@@ -17,6 +17,7 @@ const coordinatorRoutes = require("./routes/coordinator");
 const pharmacistRoutes = require("./routes/pharmacist");
 const managerRoutes = require("./routes/manager");
 const supplierRoutes = require("./routes/supplier");
+const adminRoutes = require("./routes/admin");
 
 const addDrug = () => {
   const drug = new Drug({
@@ -58,6 +59,7 @@ app.use("/coordinator", coordinatorRoutes);
 app.use("/pharmacist", pharmacistRoutes);
 app.use("/manager", managerRoutes);
 app.use("/supplier", supplierRoutes);
+app.use("/admin", adminRoutes);
 
 const PORT = 8081;
 
