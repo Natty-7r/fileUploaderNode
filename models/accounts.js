@@ -6,9 +6,10 @@ const sequelize = require("../util/db");
 const Account = sequelize.define(
   "accounts",
   {
-    id: {
+    accountId: {
       type: DataTypes.STRING,
       required: true,
+      primaryKey: true,
     },
     firstName: {
       type: DataTypes.STRING,
@@ -18,7 +19,7 @@ const Account = sequelize.define(
       type: DataTypes.STRING,
       required: true,
     },
-    email: {
+    username: {
       type: DataTypes.STRING,
       required: true,
     },

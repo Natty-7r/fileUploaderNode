@@ -18,6 +18,7 @@ const pharmacistRoutes = require("./routes/pharmacist");
 const managerRoutes = require("./routes/manager");
 const supplierRoutes = require("./routes/supplier");
 const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth");
 
 const addDrug = () => {
   const drug = new Drug({
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+app.use("/auth", authRoutes);
 app.use("/coordinator", coordinatorRoutes);
 app.use("/pharmacist", pharmacistRoutes);
 app.use("/manager", managerRoutes);

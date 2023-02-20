@@ -1,14 +1,14 @@
-const managerController = require("../controllers/manager");
+const adminController = require("../controllers/admin");
 const router = require("express").Router();
 
-router.get("/drugs", managerController.getDrugs);
+router.get("/index", adminController.getIndex);
 
-router.patch("/comment", managerController.updateCommentStatus);
+router.post("/account", adminController.createAccount);
 
-router.delete("/comment/:commentId", managerController.clearComment);
+router.delete("/account/:accountId", adminController.deleteAccount);
 
-router.post("/drugs/order", managerController.orderDrugs);
+router.patch("/account/", adminController.changAccountState);
 
-router.delete("/request", managerController.clearStoreRequest);
+router.put("/account", adminController.updateAccount);
 
 module.exports = router;

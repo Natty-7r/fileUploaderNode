@@ -7,82 +7,102 @@ const StoreOrder = require("../models/storeOrder");
 const Request = require("../models/request");
 const RequestDrug = require("../models/requestedDrugs");
 
-exports.getDrugs = async (req, res, next) => {
+const Account = require("../models/accounts");
+
+exports.getIndex = async (req, res, next) => {
   try {
-    const storeDrugs = await Store.findAll({});
-    const stockDrugs = await Stock.findAll({});
-
-    const soldDrugs = await SoldDrug.findAll({});
-    const storeRequests = await Request.findAll({
-      where: { sender: "coordinator" },
-      include: RequestDrug,
-    });
-    const comments = await Comment.findAll({});
-
-    if (!storeDrugs) {
-      const error = new Error("unable to load drugs");
-      error.statusCode = 500;
-      throw error;
+    let adminAccount,
+      userAcccounts = [];
+    const accounts = await Account.findAll({});
+    if (accounts.length == 0) {
+      adminAccount = await Account.create({
+        active: true,
+        firstName: "admin ",
+        lastName: "admin",
+        date: new Date(),
+        accountId: `admin${Date.now().toString()}`,
+        role: "admin",
+        username: "admin@gmail.com",
+        password: "admin",
+      });
+      console.log(adminAccount);
+      await adminAccount.save();
+      return res.json({
+        status: "success",
+        accounts: {
+          adminAccount,
+          userAcccounts: [],
+        },
+      });
     }
+    adminAccount = await Account.findOne({
+      where: {
+        role: "admin",
+      },
+    });
+    userAcccounts = await Account.findAll({});
+
+    userAcccounts = userAcccounts.filter((account) => {
+      return account.role != "admin";
+    });
+    console.log(userAcccounts.length);
 
     res.json({
       status: "success",
-      drugs: {
-        availbleStockDrugs: stockDrugs,
-        availbleStoreDrugs: storeDrugs,
-        expiredDrugs: soldDrugs,
-        storeOrders: [],
-        stockRequests: [],
-        comments,
-        storeRequests,
+      accounts: {
+        adminAccount,
+        userAcccounts,
       },
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    return res.json({
       status: "fail",
       message: "unable to fetch data",
-      drugs: {
-        availbleStockDrugs: [],
-        availbleStoreDrugs: [],
-        expiredDrugs: [],
-        storeOrders: [],
-        stockRequests: [],
+      accounts: {
+        adminAccount: undefined,
+        userAcccounts: [],
       },
     });
   }
 };
-exports.updateCommentStatus = async (req, res, next) => {
-  const { commentId, newStatus } = req.body;
-  let result;
+exports.createAccount = async (req, res, next) => {
+  const { account } = req.body;
+  let userAcccount = undefined;
   try {
-    result = await Comment.update(
-      { status: newStatus },
-      { where: { id: commentId } }
-    );
+    userAcccount = await Account.findOne({
+      where: { username: account.username },
+    });
+    if (userAcccount) {
+      const error = new Error();
+      error.message = "User with the username Already Exists !";
+      error.statusCode = 500;
+      throw error;
+    }
+    account.date = new Date();
+    account.accountId = `user${Date.now().toString()}`;
+    userAcccount = await Account.create(account);
+    userAcccount = await userAcccount.save();
 
-    if (!result) {
-      const error = new Error("updating unsuccesfull");
+    if (!userAcccount) {
+      const error = new Error();
+      error.message = "Failed to Create User !";
       error.statusCode = 500;
       throw error;
     }
-    if (!result.acknowledged) {
-      const error = new Error("updating unsuccesfull");
-      error.statusCode = 500;
-      throw error;
-    }
-    res.json({ status: "success" });
+    res.json({ status: "success", userAcccount });
   } catch (error) {
-    res.json({ status: "fail" });
+    res.json({ status: "fail", message: error.message });
   }
 };
-exports.clearComment = async (req, res, next) => {
-  const commentId = req.params.commentId;
+exports.deleteAccount = async (req, res, next) => {
+  const accountId = req.params.accountId;
+  console.log(accountId);
+
   try {
-    const commentToDelete = await Comment.findOne({
-      where: { id: commentId },
+    const result = await Account.destroy({
+      where: { accountId: accountId },
     });
-    const result = await commentToDelete.destroy();
     if (!result) {
       const error = new Error("deleting unsuccesfull");
       error.statusCode = 500;
@@ -90,44 +110,64 @@ exports.clearComment = async (req, res, next) => {
     }
     res.json({ status: "success" });
   } catch (error) {
-    res.json({ status: "fail" });
+    console.log(error);
+    res.json({ status: "fail", message: error.message });
   }
 };
 
-exports.orderDrugs = async (req, res, next) => {
-  const { storeOrders } = req.body;
+exports.changAccountState = async (req, res, next) => {
+  const { accountId, active } = req.body;
+  console.log(req.body);
 
   try {
-    await Request.create(
+    const result = await Account.update(
       {
-        sender: "manager",
-        status: "pending",
-        requestDate: new Date(),
-        requestedDrugs: storeOrders,
+        active: active,
       },
       {
-        include: [RequestDrug],
+        where: { accountId: accountId },
       }
     );
-    res.json({ status: "success" });
-  } catch (error) {
-    res.json({ status: "fail" });
-  }
-};
-exports.clearStoreRequest = async (req, res, next) => {
-  try {
-    const result = await Request.destroy({
-      where: {
-        sender: "coordinator",
-      },
-    });
     if (!result) {
-      const error = new Error("deleting unsuccesfull");
-      error.statusCode = 500;
+      const error = new Error();
+      error.message = "update unsuccessful";
       throw error;
     }
     res.json({ status: "success" });
   } catch (error) {
+    // console.log(error);
+    res.json({ status: "fail", message: error.message });
+  }
+};
+
+exports.updateAccount = async (req, res, next) => {
+  const { firstName, lastName, username, role, active, password, accountId } =
+    req.body;
+
+  try {
+    const result = await Account.update(
+      {
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        role: role,
+        active: active,
+        password: password,
+      },
+      {
+        where: {
+          accountId: accountId,
+        },
+      }
+    );
+    if (!result) {
+      const error = new Error("updating  unsuccesfull");
+      throw error;
+    }
+
+    res.json({ status: "success" });
+  } catch (error) {
+    console.log(error);
     res.json({ status: "fail" });
   }
 };
