@@ -6,11 +6,11 @@ exports.logIn = async (req, res, next) => {
   console.log(req.body);
   let user = undefined;
   try {
-    user = await Account.findOne({ where: { email: username } });
+    user = await Account.findOne({ where: { username: username } });
     if (!user) {
       return res.json({
         auth: false,
-        user,
+        user: { username: undefined, role: undefined },
         message: "Invalid username !",
       });
     }
@@ -23,13 +23,13 @@ exports.logIn = async (req, res, next) => {
     }
     res.json({
       auth: true,
-      user,
+      user: { username: user.username, role: user.role },
     });
   } catch (error) {
     console.log(error);
     return res.json({
       auth: false,
-      user,
+      user: { username: undefined, role: undefined },
       message: "Authentication failed !",
     });
   }
