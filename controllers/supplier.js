@@ -63,7 +63,6 @@ exports.getIndex = async (req, res, next) => {
 
 exports.addComment = async (req, res, next) => {
   let { message, username } = req.body;
-  console.log(req.body);
   try {
     const comment = new Comment({
       name: username,

@@ -13,6 +13,11 @@ const RequestDrug = sequelize.define("requestedDrugs", {
     type: DataTypes.INTEGER,
     required: true,
   },
+  status: {
+    type: DataTypes.STRING,
+    required: true,
+    default: "unbilled",
+  },
 });
 
 module.exports = RequestDrug;

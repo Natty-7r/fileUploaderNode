@@ -29,6 +29,11 @@ const StoreOrder = sequelize.define("storeorders", {
     type: DataTypes.STRING,
     required: true,
   },
+  status: {
+    type: DataTypes.STRING,
+    required: true,
+    default: "unbilled",
+  },
   suppliedDate: { type: DataTypes.DATE, required: true },
 });
 

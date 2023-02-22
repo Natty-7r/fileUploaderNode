@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrug = require("../models/soldDrugs");
@@ -129,5 +130,32 @@ exports.clearStoreRequest = async (req, res, next) => {
     res.json({ status: "success" });
   } catch (error) {
     res.json({ status: "fail" });
+  }
+};
+exports.searchDrug = async (req, res, next) => {
+  const { searchKey, from } = req.body;
+
+  try {
+    let searchResult = [];
+    if (from == "stock")
+      searchResult = await Stock.findAll({
+        where: { name: { [Op.like]: `%${searchKey}%` } },
+      });
+    if (from == "store")
+      searchResult = await Store.findAll({
+        where: { name: { [Op.like]: `%${searchKey}%` } },
+      });
+
+    return res.json({
+      status: "success",
+      searchResult,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: "fail",
+      message: "unable to fetch data",
+      searchResult: [],
+    });
   }
 };

@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+
 const Store = require("../models/store");
 const Stock = require("../models/stock");
 const SoldDrugs = require("../models/soldDrugs");
@@ -88,7 +90,6 @@ exports.sellDrug = async (req, res, next) => {
       { amount: newAmount },
       { where: { drugCode: drugCode } }
     );
-    console.log(drugSold);
     drugSold = new SoldDrugs(drugSold);
     await drugSold.save();
     if (!result.acknowledged) {
@@ -124,4 +125,25 @@ exports.deleteDrugs = (req, res, next) => {
   try {
     Stock.destroy({ where: { drugCode: drugCodes } });
   } catch (error) {}
+};
+exports.searchDrug = async (req, res, next) => {
+  const searchKey = req.params.searchKey;
+
+  try {
+    let searchResult = await Stock.findAll({
+      where: { name: { [Op.like]: `%${searchKey}%` } },
+    });
+
+    return res.json({
+      status: "success",
+      searchResult,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: "fail",
+      message: "unable to fetch data",
+      searchResult: [],
+    });
+  }
 };

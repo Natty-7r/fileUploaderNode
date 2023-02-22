@@ -29,6 +29,11 @@ const Stock = sequelize.define("stockdrugs", {
     type: DataTypes.STRING,
     required: true,
   },
+  status: {
+    type: DataTypes.STRING,
+    required: true,
+    default: "unbilled",
+  },
   suppliedDate: { type: DataTypes.DATE, required: true },
 });
 

@@ -14,7 +14,7 @@ router.post("/drugs/request", pharmacistContoller.requestDrug);
 
 router.post("/drugs/register", pharmacistContoller.acceptOrders);
 
-// router.post("/drugs/order", pharmacistContoller.addToStock);
+router.get("/search/:searchKey", pharmacistContoller.searchDrug);
 
 module.exports = router;
 

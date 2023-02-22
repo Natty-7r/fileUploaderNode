@@ -11,4 +11,6 @@ router.post("/drugs/order", managerController.orderDrugs);
 
 router.delete("/request", managerController.clearStoreRequest);
 
+router.post("/search", managerController.searchDrug);
+
 module.exports = router;

@@ -1,45 +1,45 @@
-const Store = require("../models/store");
-const Stock = require("../models/stock");
+const { Op } = require("sequelize");
 const SoldDrug = require("../models/soldDrugs");
-const Comment = require("../models/comments");
-
-const StoreOrder = require("../models/storeOrder");
-const Request = require("../models/request");
-const RequestDrug = require("../models/requestedDrugs");
 
 const Account = require("../models/accounts");
 
 exports.getIndex = async (req, res, next) => {
   try {
-    let adminAccount,
-      userAcccounts = [];
+    const yestedayTime = Date.now() - 24 * 3600 * 1000;
+    const yesteday = new Date(yestedayTime);
 
-    adminAccount = await Account.findOne({
+    const unbilledDrugs = await SoldDrug.findAll({
       where: {
-        role: "admin",
+        status: "unbilled",
       },
     });
-    userAcccounts = await Account.findAll({});
-
-    userAcccounts = userAcccounts.filter((account) => {
-      return account.role != "admin";
+    const billedToday = await SoldDrug.findAll({
+      where: {
+        [Op.and]: [
+          {
+            status: "billed",
+          },
+          {
+            updatedAt: {
+              [Op.gt]: yesteday,
+            },
+          },
+        ],
+      },
     });
+
     res.json({
       status: "success",
-      accounts: {
-        adminAccount,
-        userAcccounts,
-      },
+      unbilledDrugs,
+      billedToday,
     });
   } catch (error) {
     console.log(error);
     return res.json({
       status: "fail",
       message: "unable to fetch data",
-      accounts: {
-        adminAccount: undefined,
-        userAcccounts: [],
-      },
+      unbilledDrugs: [],
+      billedToday: [],
     });
   }
 };

@@ -29,6 +29,11 @@ const Stock = sequelize.define("soldrugs", {
     type: DataTypes.STRING,
     required: true,
   },
+  status: {
+    type: DataTypes.STRING,
+    required: true,
+    default: "unbilled",
+  },
   soldDate: { type: DataTypes.DATE, required: true },
 });
 
