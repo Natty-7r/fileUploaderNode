@@ -55,31 +55,6 @@ const casherRoutes = require("./routes/casher");
 const customerRoutes = require("./routes/customer");
 const authRoutes = require("./routes/auth");
 
-const addDrug = () => {
-  const drug = new Drug({
-    drugCode: 123,
-    name: "diclone",
-    amount: 100,
-    price: 20,
-    supplier: "dagi store",
-    expireDate: new Date("12/12/05"),
-    suppliedDate: new Date("12/12/12"),
-  });
-  drug.save();
-};
-// addDrug();
-const addComment = () => {
-  const comment = new Comment({
-    name: "natty",
-    sender: "supplier",
-    message:
-      "every thing is good man i like the way you handle things ayy  really really like it every thing is good man i like the way you handle things ayy  really really like it every thing is good man i like the way you handle things ayy  really really like it  ",
-    commentDate: new Date("2/16/2023"),
-    status: "unread",
-  });
-  comment.save();
-};
-
 const app = express();
 app.use((req, res, next) => {
   console.log(req.url);
@@ -106,7 +81,6 @@ Request.RequestDrugs = Request.hasMany(RequestDrug, { onDelete: "CASCADE" });
 RequestDrug.belongsTo(Request);
 sequelize
   .sync()
-  // .sync({ force: true })
   .then((r) => {
     app.listen(PORT, () => {
       console.log(`server running at port ${PORT} `);

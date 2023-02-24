@@ -9,6 +9,8 @@ const RequestDrug = require("../models/requestedDrugs");
 
 const Account = require("../models/accounts");
 
+const bcrypt = require("bcrypt");
+
 exports.getIndex = async (req, res, next) => {
   try {
     let adminAccount,
@@ -58,6 +60,8 @@ exports.createAccount = async (req, res, next) => {
     }
     account.date = new Date();
     account.accountId = `user${Date.now().toString()}`;
+    const hashPassword = await bcrypt.hash(account.password, 12);
+    account.password = hashPassword;
     userAcccount = await Account.create(account);
     userAcccount = await userAcccount.save();
 
@@ -120,6 +124,7 @@ exports.changAccountState = async (req, res, next) => {
 exports.updateAccount = async (req, res, next) => {
   const { firstName, lastName, username, role, active, password, accountId } =
     req.body;
+  const hashPassword = await bcrypt.hash(password, 12);
 
   try {
     const result = await Account.update(
@@ -129,7 +134,7 @@ exports.updateAccount = async (req, res, next) => {
         username: username,
         role: role,
         active: active,
-        password: password,
+        password: hashPassword,
       },
       {
         where: {

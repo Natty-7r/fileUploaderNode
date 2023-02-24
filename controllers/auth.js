@@ -1,10 +1,11 @@
 const Account = require("../models/accounts");
-
+const bcrypt = require("bcrypt");
 exports.logIn = async (req, res, next) => {
   const { username, password } = req.body;
   let user = undefined;
   try {
     const accounts = await Account.findAll({});
+    const hashPassword = await bcrypt.hash("admin", 12);
     if (accounts.length == 0) {
       adminAccount = await Account.create({
         active: true,
@@ -14,7 +15,7 @@ exports.logIn = async (req, res, next) => {
         accountId: `admin${Date.now().toString()}`,
         role: "admin",
         username: "admin",
-        password: "admin",
+        password: hashPassword,
       });
 
       await adminAccount.save();
@@ -27,7 +28,9 @@ exports.logIn = async (req, res, next) => {
         message: "Invalid username !",
       });
     }
-    if (password != user.password) {
+
+    const passwortMatch = await bcrypt.compare(password, user.password);
+    if (!passwortMatch) {
       return res.json({
         auth: false,
         user,

@@ -40,7 +40,6 @@ exports.getDrugs = async (req, res, next) => {
     });
   } catch (error) {}
 };
-
 exports.requestDrug = async (req, res, next) => {
   let { stockRequest: stockRequests } = req.body;
 
